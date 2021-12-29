@@ -88,6 +88,41 @@ house_data[is.na(house_data$Fence), 'Fence'] <- 'none'
 # MiscFeature tells us more about miscellaneous features in house not covered by other categories
 house_data[is.na(house_data$MiscFeature), 'MiscFeature'] <- 'none'
 
+# I will put categorical features in one set and numerical features in one set to tidy and understand the relations better
+# Reference - https://dplyr.tidyverse.org/
+categorical_features <- house_data %>% select(where(is.character))
+numerical_features <- house_data %>% select(where(is.numeric))
+numerical_features <- numerical_features[,-1]
+sales <- numerical_features[,ncol(numerical_features)]
+
+# We use principal component analysis to find out which of these features explain the saleprice most effectively.
+
+pca <- prcomp(select(numerical_features, -ncol(numerical_features)), scale. = T)
+variance <- pca$sdev^2
+variance_explained <- round(variance/ sum(variance)*100, 1)
+
+ggdata <- data.frame('PCs' = 1:36, 
+'variance' = variance_explained)
+
+ggplot(data = ggdata, aes(x=PCs, y = variance)) +
+  geom_bar(aes(fill = variance_explained), stat = 'identity', width = 0.8) +
+  xlab('Principal Components') +
+  ylab('Variance Explained') +
+  scale_fill_gradient2(low = '#FAF66A', mid = '#FABF6A', high = '#F0600E')+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('black'),
+        text = element_text(size = 20))
+  
+  
+  
+  
+# We can see above that some features do not contribute to variance and are hence redundant for this problem
+# We now check the features that are really important in explaining saleprice of the house
+
+
+
 # Looking at the sale price we see that it is skewed towards right and we can improve it by taking log transform
 ggplot(data = house_data) + geom_density(aes(x=SalePrice)) 
 
