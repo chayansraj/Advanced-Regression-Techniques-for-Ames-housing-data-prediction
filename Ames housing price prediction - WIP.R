@@ -100,7 +100,7 @@ sales <- numerical_features[,ncol(numerical_features)]
 ggplot(data = numerical_features, aes(x=SalePrice)) +
   geom_histogram(aes(y= ..density..),
                  bins = 30, fill = '#FF9933', color='black') +
-  geom_density( alpha = 0.3, stat = 'density', fill='#99CCFF', color='#FF9933') +
+  geom_density( alpha = 0.3, stat = 'density', fill='white', color='black') +
   theme(panel.grid.major = element_blank(), 
         panel.background = element_rect('white'),
         text = element_text(size = 20),
