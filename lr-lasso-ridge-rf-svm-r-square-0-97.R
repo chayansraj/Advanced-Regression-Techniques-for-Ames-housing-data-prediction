@@ -235,11 +235,7 @@ costs <- 2^(-3:3)
 epsilon <- c(0.1,0.01,0.001)
 library(e1071)
 
-svmtune <- tune.svm(price~.,
-                data = train,
-                gamma = gammas,
-                cost = costs,
-                epsilon = epsilon)
+#svmtune <- tune.svm(price~.,  data = train, gamma = gammas, cost = costs,epsilon = epsilon)
 
 # Above hyperparameter tuning of svm gives us the best values for gamma = 0.125, cost = 4, epsilon = 0.01 and then we train our optimal model on whole training data set.
 
