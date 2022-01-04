@@ -32,7 +32,8 @@ id <- sample(nrow(full_data), floor(nrow(full_data)*0.75))
 
 
 # Price of the used cars seems to be positively skewed and I think a simple log transformation should balance the distribution.
-full_data$price <- full_data$price^(1/4)
+#full_data$price <- full_data$price^(1/4)
+full_data$price <- log(full_data$price)
 
 # Also some of the predictors in our training data are skewed, also it's in different scale, so we can apply the same technique there
 full_data$mileage <- full_data$mileage^(1/4)
@@ -94,8 +95,7 @@ fit_control <- trainControl(method = 'repeatedcv',
 # Building simple linear regression model using caret's train function
 simplelrfit <- train(price~.,
                      data = train,
-                     method = 'lm',
-                     trControl = fit_control)
+                     method = 'lm')
 predsimplelrfit <- predict.train(simplelrfit, 
                                  newdata = test)
 
@@ -108,7 +108,7 @@ pred_plot <- plot(x = test_response,
                   xlab = 'Actual Values',
                   ylab = 'Predicted Values',
                   main = 'Simple Linear Regression',
-                  ylim = c(6,12),
+                  ylim = c(6,18),
                   abline(a=0,b=1, col = 'red'))
 
 resid_simplelr <- plot(x = predsimplelrfit,
@@ -218,7 +218,7 @@ pred_plot_ranfo <- plot(x = test_response,
                   xlab = 'Actual Values',
                   ylab = 'Predicted Values',
                   main = 'Random Forest (R-Squared - 96%)',
-                  ylim = c(6,12),
+                  ylim = c(6,18),
                   abline(a=0,b=1, col = 'red'))
 
 resid_ranfor <- plot(x = pred_ranger$predictions,
