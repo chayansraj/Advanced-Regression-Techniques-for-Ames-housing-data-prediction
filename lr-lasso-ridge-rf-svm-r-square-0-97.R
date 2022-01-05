@@ -79,7 +79,7 @@ test_response <- as.numeric(test[, 'price'])
 # Keeping y test from test data frame
 test <- select(test, -price)
 
-
+#metric
 # Defining R-Squared function for measuring performance of our predictive models.
 r_sqaured <- function(pred){
   rss <- sum((pred - test_response) ^ 2)
