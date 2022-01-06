@@ -108,7 +108,7 @@ pred_plot <- plot(x = test_response,
                   xlab = 'Actual Values',
                   ylab = 'Predicted Values',
                   main = 'Simple Linear Regression',
-                  ylim = c(6,18),
+                  ylim = c(6,12),
                   abline(a=0,b=1, col = 'red'))
 
 resid_simplelr <- plot(x = predsimplelrfit,
@@ -135,7 +135,7 @@ optridgefit <- train(price~.,
                   method = 'glmnet',
                   trControl = fit_control,
                   tuneGrid = expand.grid(data.frame(alpha = 0,
-                                                    lambda = 0.0381)))
+                                                    lambda = 0.0391)))
 
 predridgefit <- predict.train(ridgefit, newdata = test)
 
@@ -157,7 +157,7 @@ optlassofit <- train(price~.,
                   data = train,
                   method = 'glmnet',
                   tuneGrid = expand.grid(data.frame(alpha = 1,
-                                                    lambda = 0.00021)))
+                                                    lambda = 0.00049)))
 
 predlassofit <- predict.train(optlassofit, newdata = test)
 
