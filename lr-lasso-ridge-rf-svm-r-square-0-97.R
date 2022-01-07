@@ -205,11 +205,20 @@ for (i in 1:nrow(hyper_grid)) {
 hyper_grid$OOB_RMSE[i] <- sqrt(ranger_rf$prediction.error)
   }
 
-# Above ranger object gives us out optimal tree of mtry = 3, node size = 5, and sample size of 100% of train data.
+# Above ranger object gives us out optimal tree of mtry = 4, node size = 5, and sample size of 100% of train data.
  
 # We use this optimal random forest tree to predict our house prices using test data
 
-pred_ranger <- predict(ranger_rf, data = test)
+ranfofit <-ranger(price~., 
+                  data = train, 
+                  mtry = 4, 
+                  min.node.size = 5, 
+                  num.trees = 500,
+                  write.forest =  TRUE,
+                  sample.fraction = 1,
+                  keep.inbag = TRUE)
+
+pred_ranger <- predict(ranfofit, data = test)
 
 rsq_ranforfit <- r_sqaured(pred_ranger$predictions)
 
@@ -230,12 +239,12 @@ resid_ranfor <- plot(x = pred_ranger$predictions,
 
 # As we can see, random forests has become the strongest Jedi of all the models present here and it is also robust to outliers getting us an R-Sqaured value of 0.96 for this dataset. 
 
-gammas <- 2^(-3:3)
-costs <- 2^(-3:3)
-epsilon <- c(0.1,0.01,0.001)
+gammas <- 2^(-4:4)
+costs <- 2^(-4:4)
+epsilon <- c(1,0.1,0.01,0.001)
 library(e1071)
 
-#svmtune <- tune.svm(price~.,  data = train, gamma = gammas, cost = costs,epsilon = epsilon)
+svmtune <- tune.svm(price~.,  data = train, gamma = gammas, cost = costs,epsilon = epsilon)
 
 # Above hyperparameter tuning of svm gives us the best values for gamma = 0.125, cost = 4, epsilon = 0.01 and then we train our optimal model on whole training data set.
 
