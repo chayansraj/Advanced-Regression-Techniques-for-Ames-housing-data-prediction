@@ -239,9 +239,9 @@ resid_ranfor <- plot(x = pred_ranger$predictions,
 
 # As we can see, random forests has become the strongest Jedi of all the models present here and it is also robust to outliers getting us an R-Sqaured value of 0.96 for this dataset. 
 
-gammas <- 2^(-4:4)
-costs <- 2^(-4:4)
-epsilon <- c(1,0.1,0.01,0.001)
+gammas <- 2^(-3:3)
+costs <- 2^(-3:3)
+epsilon <- c(0.1,0.01,0.001)
 library(e1071)
 
 svmtune <- tune.svm(price~.,  data = train, gamma = gammas, cost = costs,epsilon = epsilon)
@@ -253,8 +253,8 @@ svmoptimal <- svm(price~.,
                   scale = T, 
                   type = 'eps-regression', 
                   kernel = 'radial', 
-                  gamma = 0.125, 
-                  cost=4, 
+                  gamma = 1, 
+                  cost=1, 
                   epsilon = 0.01 )
 
 
