@@ -95,12 +95,13 @@ numerical_features <- house_data %>% select(where(is.numeric))
 numerical_features <- numerical_features[,-1]
 sales <- numerical_features[,ncol(numerical_features)]
 
-
+attach(numerical_features)
 
 ggplot(data = numerical_features, aes(x=SalePrice)) +
   geom_histogram(aes(y= ..density..),
                  bins = 30, fill = '#FF9933', color='black') +
   geom_density( alpha = 0.3, stat = 'density', fill='white', color='black') +
+  scale_x_continuous(label = function(l) as.integer(format(l,scientific=F)))+
   theme(panel.grid.major = element_blank(), 
         panel.background = element_rect('white'),
         text = element_text(size = 20),
@@ -131,7 +132,57 @@ ggplot(data = ggdata, aes(x=PCs, y = variance)) +
 # We now check the features that are really important in explaining variance of the data.
 imp_features <- sort(abs(pca$rotation[,1]), decreasing = T)
 
+# Here we have some really important numerical features as we can see, and now we see the association between some of these features and our sales.
+ggplot(data = numerical_features, 
+       aes(x= as.factor(OverallQual), 
+           y = SalePrice, 
+           fill = as.factor(OverallQual))) +
+  geom_boxplot( color = 'black', outlier.color = NULL) +
+  xlab('OverallQual')+
+  ylab('SalePrice')+
+  scale_color_brewer(palette = 'Set3')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  scale_fill_brewer(palette = 'Spectral') +
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
 
+# The plot shows that there is a strong relationship between them.
+
+ggplot() +
+  geom_point(data = numerical_features, 
+             aes(x= GrLivArea, 
+                 y = SalePrice),
+             color='black',
+             fill = '#CC3333', 
+             size = 3, 
+             shape=21, 
+             alpha=0.6) +
+  geom_point(data = as.data.frame(numerical_features[c(524,1299), 
+                                                     c("GrLivArea", "SalePrice")]),
+             aes(x=GrLivArea, y = SalePrice), 
+             color='black', 
+             size=4, 
+             shape=21, 
+             fill='#3399FF',
+             alpha=0.8)+
+  geom_smooth(method = 'loess')+
+  xlab('GrLivArea')+
+  ylab('SalePrice')+
+  scale_color_brewer(palette = 'Set3')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  scale_fill_brewer(palette = 'Spectral') +
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+# Here we see that there is a strong positive correlation between ground living area and sale price but also, we have some outliers which we shall remove as suggested by data author
+numerical_features <- numerical_features[-c(which(GrLivArea>4500)), ]
+categorical_features <- categorical_features[-c(524,1299), ]
 # Looking at the sale price we see that it is skewed towards right and we can improve it by taking log transform
 ggplot(data = house_data) + geom_density(aes(x=SalePrice)) 
 
