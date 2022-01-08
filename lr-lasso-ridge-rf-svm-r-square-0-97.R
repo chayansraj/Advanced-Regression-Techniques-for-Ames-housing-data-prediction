@@ -244,41 +244,8 @@ costs <- 2^(-3:3)
 epsilon <- c(0.1,0.01,0.001)
 library(e1071)
 
-
-train_full <- merge(X_train, y_train, by = 'carID')
-test_full <- merge(X_test, y_test, by = 'carID')
-full_data <- rbind(train_full, test_full)
-full_data <- select(full_data, -carID)
-full_data <- mutate_at(full_data, c(7,8,9), as.double)
-full_data <- full_data %>% mutate_if(is.character, ~as.factor(.))
-full_data <- mutate_at(full_data, c(3), as.factor)
-id <- sample(nrow(full_data), floor(nrow(full_data)*0.75))
-full_data$price <- full_data$price^(1/4)
-full_data$mileage <- full_data$mileage^(1/4)
-full_data$mpg <- log(full_data$mpg)
-# We can also try some of the non-linear transformations and learn how it affects our model
-full_data$tax <- sqrt(full_data$tax)
-# Separate into training and test sets
-train <- full_data[id,]
-test <- full_data[-id,]
-# Now we check if our partition has similar proportions in train and test data
-train %>% group_by(brand) %>% summarise(n(), percent = n()/nrow(train)*100)
-test %>% group_by(brand) %>% summarise(n(), percent = n()/nrow(test)*100)
-# As we check the year column and see that some rows are present in test column but not present in training column which may cause problem as the model has never seen that data and we need to clean it before we measure our model.
-train %>% group_by(year) %>% summarise(n())
-test %>% group_by(year) %>% summarise(n())
-# Rows where data is uneven in test data are: 161,1939,2692,3242,5144
-which(train$year == 1970)
-which(train$year == 2000)
-which(train$year == 1997) 
-train <- train[-c(161,1939,2692,3242,5144),]
-`%!in%` <- Negate(`%in%`)
-which(unique(train$model)  %!in% unique(test$model))
-which(unique(train$fuelType)  %!in% unique(test$fuelType))
-# There is one transmission which is not in test data
-unique(train$transmission)  %!in% unique(test$transmission)
-train <- train[-c(1159,1211),]
-
+train$price <- (exp(train$price))^(1/4)
+test_response <- (exp(test_response))^(1/4)
 #svmtune <- tune.svm(price~.,  data = train, gamma = gammas, cost = costs,epsilon = epsilon)
 
 # Above hyperparameter tuning of svm gives us the best values for gamma = 0.04, cost = 6, epsilon = 0.001 and then we train our optimal model on whole training data set.
