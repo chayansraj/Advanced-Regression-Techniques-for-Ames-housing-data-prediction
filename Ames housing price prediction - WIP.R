@@ -90,7 +90,12 @@ house_data[is.na(house_data$MiscFeature), 'MiscFeature'] <- 'none'
 
 # I will put categorical features in one set and numerical features in one set to tidy and understand the relations better
 # Reference - https://dplyr.tidyverse.org/
-categorical_features <- house_data %>% select(where(is.character))
+
+# There are some columns that are wrongly added as numeric but are in fact categorical, we need to figure them out and change it
+house_data[,c(18,19,20,21,48,49,50,51,52,53,55,57,60,62,78)] <- lapply(house_data[,c(18,19,20,21,48,49,50,51,52,53,55,57,60,62,78)], as.factor)
+
+house_data<-  house_data %>% mutate_if(is.character, ~as.factor(.))
+categorical_features <- house_data %>% select(where(is.factor))
 numerical_features <- house_data %>% select(where(is.numeric))
 numerical_features <- numerical_features[,-1]
 sales <- numerical_features[,ncol(numerical_features)]
@@ -112,11 +117,11 @@ pca <- prcomp(select(numerical_features, -ncol(numerical_features)), scale. = T)
 variance <- pca$sdev^2
 variance_explained <- round(variance/ sum(variance)*100, 1)
 
-ggdata <- data.frame('PCs' = 1:36, 
+ggdata <- data.frame('PCs' = 1:22, 
                      'variance' = variance_explained)
 
 
-ggdata2 <- data.frame('PCs' = 1:36, 
+ggdata2 <- data.frame('PCs' = 1:22, 
 'variance' = cumsum(variance_explained))
 
 ggplot(data = ggdata, aes(x=PCs, y = variance)) +
@@ -203,18 +208,6 @@ numerical_features <- numerical_features[-c(which(GrLivArea>4500)), ]
 categorical_features <- categorical_features[-c(524,1299), ]
 
 
-
-ggplot(data = numerical_features, aes(x=GarageCars, y = SalePrice, fill=as.factor(GarageCars))) +
-  geom_boxplot()+
-  xlab('Number of cars in garage')+
-  ylab('SalePrice')+
-  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
-  theme(legend.position = 'none',
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect('white'),
-        text = element_text(size = 20))
-
 ggplot(data = numerical_features, aes(x=GarageArea, y = SalePrice)) +
   geom_point(color='black', 
              size=3, 
@@ -229,7 +222,141 @@ ggplot(data = numerical_features, aes(x=GarageArea, y = SalePrice)) +
         panel.grid.minor = element_blank(),
         panel.background = element_rect('white'),
         text = element_text(size = 20))
+
+
+
+# Now we see Total Basement SquareFeet
+ggplot(data = numerical_features, aes(x=TotalBsmtSF, y = SalePrice)) +
+  geom_point(color='black', 
+             size=3, 
+             shape=21, 
+             fill='#339966',
+             alpha=0.8) + geom_smooth(method = 'loess', color='red') +
+  xlab('Total Basement Square feet area')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+
+#  Now we check first floor sqaure feet
+
+ggplot(data = numerical_features, aes(x=X1stFlrSF, y = SalePrice)) +
+  geom_point(color='black', 
+             size=3, 
+             shape=21, 
+             fill='#999966',
+             alpha=0.8) + geom_smooth(method = 'loess', color='blue') +
+  xlab('First floor Square feet area')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+
+
+
+
+ggplot(data = numerical_features, aes(x=GarageCars, y = SalePrice, fill=as.factor(GarageCars))) +
+  geom_boxplot()+
+  xlab('Number of cars in garage')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+
 # Since number of garage cars will always be proportional to the garage area and we check it finding the correlation between them, they are highly correlated and so we remove garage cars and keep garage area
+
+numerical_features <- numerical_features[,-c(26)]
+
+ggplot(data = numerical_features, aes(x=FullBath, y = SalePrice, fill=as.factor(FullBath))) +
+  geom_boxplot()+
+  xlab('Number of full bathrooms')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+# In real life also, it doesn't make sense, since increasing bathrooms decreases the livable area and so does not contribute to the price
+numerical_features <- numerical_features[,-c(19)]
+
+
+
+
+# Now we check year built, does it feel important? I think, remodelling year would be more importat but let's check
+ggplot(data = numerical_features, aes(x=YearBuilt, y = SalePrice, fill=as.factor(YearBuilt))) +
+  geom_boxplot()+
+  xlab('Year Built')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+# Yes, we can see that it was week correlation with sale price.
+
+ggplot(data = numerical_features, aes(x=TotRmsAbvGrd, y = SalePrice, fill=as.factor(TotRmsAbvGrd))) +
+  geom_boxplot()+
+  xlab('Number of rooms above ground')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+# This trend shows a good relationship between number of rooms and sale price
+
+ggplot(data = numerical_features, aes(x=GarageYrBlt,  y = SalePrice, fill=as.factor(GarageYrBlt))) +
+  geom_boxplot()+
+  xlab('Garage Year Built')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+# It has a positive correlation with sale price
+ggplot(data = numerical_features, aes(x=YearRemodAdd,  y = SalePrice, fill=as.factor(YearRemodAdd))) +
+  geom_boxplot()+
+  xlab('Garage Year Built')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+# Not much relation 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
