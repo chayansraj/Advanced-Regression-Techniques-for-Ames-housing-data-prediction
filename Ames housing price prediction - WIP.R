@@ -16,7 +16,7 @@ house_data <- read.csv('D:/LiU/Courses/Machine Learning - 732A99/Labs/Lab 2 Bloc
 
 na_perc <- list()
 for (i in colnames(house_data)) {
-  na_perc <- c(na_perc, list(round(sum(is.na(house_data[,i])/nrow(house_data)),
+  na_perc <- c(na_perc, list( round(sum(is.na(house_data[,i])/nrow(house_data)),
                           3)*100))
 }
 names(na_perc) <- colnames(house_data)
@@ -99,7 +99,7 @@ attach(numerical_features)
 
 ggplot(data = numerical_features, aes(x=SalePrice)) +
   geom_histogram(aes(y= ..density..),
-                 bins = 30, fill = '#FF9933', color='black') +
+                 bins = 50, fill = '#FF9933', color='black') +
   geom_density( alpha = 0.3, stat = 'density', fill='white', color='black') +
   scale_x_continuous(label = function(l) as.integer(format(l,scientific=F)))+
   theme(panel.grid.major = element_blank(), 
@@ -113,11 +113,29 @@ variance <- pca$sdev^2
 variance_explained <- round(variance/ sum(variance)*100, 1)
 
 ggdata <- data.frame('PCs' = 1:36, 
-'variance' = variance_explained)
+                     'variance' = variance_explained)
+
+
+ggdata2 <- data.frame('PCs' = 1:36, 
+'variance' = cumsum(variance_explained))
 
 ggplot(data = ggdata, aes(x=PCs, y = variance)) +
   geom_bar(aes(fill = variance_explained), stat = 'identity', width = 0.8, color='black') +
-  geom_text(aes(label = variance_explained), size=4, vjust=-0.8,color='black' ) +
+  geom_text(aes(label =variance_explained), size=4, vjust=-0.8,color='black' ) +
+  xlab('Principal Components') +
+  ylab('Variance Explained') +
+  scale_fill_gradient2(low = '#FAF66A', mid = '#FABF6A', high = '#F0600E')+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+
+
+ggplot(data = ggdata2, aes(x=PCs, y = variance)) +
+  geom_bar(aes(fill = variance_explained), stat = 'identity', width = 0.8, color='black') +
+  geom_text(aes(label = cumsum(variance_explained)), size=4, vjust=-0.8,color='black' ) +
   xlab('Principal Components') +
   ylab('Variance Explained') +
   scale_fill_gradient2(low = '#FAF66A', mid = '#FABF6A', high = '#F0600E')+
@@ -183,6 +201,43 @@ ggplot() +
 # Here we see that there is a strong positive correlation between ground living area and sale price but also, we have some outliers which we shall remove as suggested by data author
 numerical_features <- numerical_features[-c(which(GrLivArea>4500)), ]
 categorical_features <- categorical_features[-c(524,1299), ]
+
+
+
+ggplot(data = numerical_features, aes(x=GarageCars, y = SalePrice, fill=as.factor(GarageCars))) +
+  geom_boxplot()+
+  xlab('Number of cars in garage')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+ggplot(data = numerical_features, aes(x=GarageArea, y = SalePrice)) +
+  geom_point(color='black', 
+             size=3, 
+             shape=21, 
+             fill='#3399FF',
+             alpha=0.8) + geom_smooth(method = 'lm', color='red') +
+  xlab('Garage Area')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+# Since number of garage cars will always be proportional to the garage area and we check it finding the correlation between them, they are highly correlated and so we remove garage cars and keep garage area
+
+
+
+
+
+
+
+
 # Looking at the sale price we see that it is skewed towards right and we can improve it by taking log transform
 ggplot(data = house_data) + geom_density(aes(x=SalePrice)) 
 
