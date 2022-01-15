@@ -117,11 +117,11 @@ pca <- prcomp(select(numerical_features, -ncol(numerical_features)), scale. = T)
 variance <- pca$sdev^2
 variance_explained <- round(variance/ sum(variance)*100, 1)
 
-ggdata <- data.frame('PCs' = 1:22, 
+ggdata <- data.frame('PCs' = 1:length(variance_explained), 
                      'variance' = variance_explained)
 
 
-ggdata2 <- data.frame('PCs' = 1:22, 
+ggdata2 <- data.frame('PCs' = 1:length(variance_explained), 
 'variance' = cumsum(variance_explained))
 
 ggplot(data = ggdata, aes(x=PCs, y = variance)) +
@@ -143,7 +143,7 @@ ggplot(data = ggdata2, aes(x=PCs, y = variance)) +
   geom_text(aes(label = cumsum(variance_explained)), size=4, vjust=-0.8,color='black' ) +
   xlab('Principal Components') +
   ylab('Variance Explained') +
-  scale_fill_gradient2(low = '#FAF66A', mid = '#FABF6A', high = '#F0600E')+
+  scale_fill_gradient2(low = '#F0600E', mid = '#FABF6A', high = '#FAF66A')+
   theme(legend.position = 'none',
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
