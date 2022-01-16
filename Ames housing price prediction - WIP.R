@@ -9,7 +9,7 @@ library(dplyr)
 
 
 #Read the data 
-house_data <- read.csv('D:/LiU/Courses/Machine Learning - 732A99/Labs/Lab 2 Block 2/train.csv')
+house_data <- read.csv('train.csv')
 
 # Analyzing the dataset
 # Checking the percentage of missing values in each column and analyzing it
@@ -114,6 +114,7 @@ ggplot(data = numerical_features, aes(x=SalePrice)) +
 # We use principal component analysis to find out which of these features explain the saleprice most effectively.
 
 pca <- prcomp(select(numerical_features, -ncol(numerical_features)), scale. = T)
+#pca <- prcomp(numerical_features, scale. = T)
 variance <- pca$sdev^2
 variance_explained <- round(variance/ sum(variance)*100, 1)
 
@@ -155,24 +156,46 @@ ggplot(data = ggdata2, aes(x=PCs, y = variance)) +
 # We now check the features that are really important in explaining variance of the data.
 imp_features <- sort(abs(pca$rotation[,1]), decreasing = T)
 
-# Here we have some really important numerical features as we can see, and now we see the association between some of these features and our sales.
-ggplot(data = numerical_features, 
-       aes(x= as.factor(OverallQual), 
-           y = SalePrice, 
-           fill = as.factor(OverallQual))) +
-  geom_boxplot( color = 'black', outlier.color = NULL) +
-  xlab('OverallQual')+
+# According to PCA, we see that first floor square feet area explains the most variance
+#  Now we visualize first floor sqaure feet with respect to Sale Price
+
+ggplot(data = numerical_features, aes(x=X1stFlrSF, y = SalePrice)) +
+  geom_point(color='black', 
+             size=3, 
+             shape=21, 
+             fill='#999966',
+             alpha=0.8) + geom_smooth(method = 'lm', color='blue') +
+  xlab('First floor Square feet area')+
   ylab('SalePrice')+
-  scale_color_brewer(palette = 'Set3')+
   scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
-  scale_fill_brewer(palette = 'Spectral') +
   theme(legend.position = 'none',
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect('white'),
         text = element_text(size = 20))
 
-# The plot shows that there is a strong relationship between them.
+# The plot shows that there is a strong relationship between them and also it suggests presence of some outliers
+
+
+# Now we see Total Basement SquareFeet against SalePrice
+ggplot(data = numerical_features, aes(x=TotalBsmtSF, y = SalePrice)) +
+  geom_point(color='black', 
+             size=3, 
+             shape=21, 
+             fill='#339966',
+             alpha=0.8) + geom_smooth(method = 'lm', color='red') +
+  xlab('Total Basement Square feet area')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+# Again we have some outliers and there is a strong relationship between the variables.
+
+
+# Now we check ground living area and saleprice
 
 ggplot() +
   geom_point(data = numerical_features, 
@@ -192,7 +215,7 @@ ggplot() +
              fill='#3399FF',
              alpha=0.8)+
   geom_smooth(method = 'loess')+
-  xlab('GrLivArea')+
+  xlab('Ground Living Area')+
   ylab('SalePrice')+
   scale_color_brewer(palette = 'Set3')+
   scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
@@ -202,13 +225,48 @@ ggplot() +
         panel.grid.minor = element_blank(),
         panel.background = element_rect('white'),
         text = element_text(size = 20))
-
-# Here we see that there is a strong positive correlation between ground living area and sale price but also, we have some outliers which we shall remove as suggested by data author
+# Here we see that there is a strong positive correlation between ground living area and sale price but also, we have some outliers which we shall remove as suggested by author.
 numerical_features <- numerical_features[-c(which(GrLivArea>4500)), ]
 categorical_features <- categorical_features[-c(524,1299), ]
 
 
+# Now we look at Garage Area against Sale Price
 ggplot(data = numerical_features, aes(x=GarageArea, y = SalePrice)) +
+  geom_point(color='black', 
+             size=3, 
+             shape=21, 
+             fill='#3399FF',
+             alpha=0.8) + geom_smooth(method = 'lm', color='red') +
+  xlab('Garage Area')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+# It again has a strong positive correlation with sale price
+
+ggplot(data = numerical_features, aes(x=MasVnrArea, y = SalePrice)) +
+  geom_point(color='black', 
+             size=3, 
+             shape=21, 
+             fill='#3399FF',
+             alpha=0.8) + geom_smooth(method = 'lm', color='red') +
+  xlab('Garage Area')+
+  ylab('SalePrice')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
+
+# From the plot, we can see that most of the values are zero and if we check it more than 50% values are missing, maybe because this feature is not that important?
+
+
+# Now we look at Finished basement square feet area against Sale Price
+ggplot(data = numerical_features, aes(x=BsmtFinSF1, y = SalePrice)) +
   geom_point(color='black', 
              size=3, 
              shape=21, 
@@ -225,32 +283,14 @@ ggplot(data = numerical_features, aes(x=GarageArea, y = SalePrice)) +
 
 
 
-# Now we see Total Basement SquareFeet
-ggplot(data = numerical_features, aes(x=TotalBsmtSF, y = SalePrice)) +
+# Now we look at Finished basement square feet area against Sale Price
+ggplot(data = numerical_features, aes(x=LotArea, y = SalePrice)) +
   geom_point(color='black', 
              size=3, 
              shape=21, 
-             fill='#339966',
-             alpha=0.8) + geom_smooth(method = 'loess', color='red') +
-  xlab('Total Basement Square feet area')+
-  ylab('SalePrice')+
-  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
-  theme(legend.position = 'none',
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect('white'),
-        text = element_text(size = 20))
-
-
-#  Now we check first floor sqaure feet
-
-ggplot(data = numerical_features, aes(x=X1stFlrSF, y = SalePrice)) +
-  geom_point(color='black', 
-             size=3, 
-             shape=21, 
-             fill='#999966',
-             alpha=0.8) + geom_smooth(method = 'loess', color='blue') +
-  xlab('First floor Square feet area')+
+             fill='#3399FF',
+             alpha=0.8) + geom_smooth(method = 'lm', color='red') +
+  xlab('Garage Area')+
   ylab('SalePrice')+
   scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
   theme(legend.position = 'none',
@@ -261,7 +301,22 @@ ggplot(data = numerical_features, aes(x=X1stFlrSF, y = SalePrice)) +
 
 
 
-
+# Here we have some really important numerical features as we can see, and now we see the association between some of these features and our sales.
+ggplot(data = numerical_features, 
+       aes(x= as.factor(OverallQual), 
+           y = SalePrice, 
+           fill = as.factor(OverallQual))) +
+  geom_boxplot( color = 'black', outlier.color = NULL) +
+  xlab('OverallQual')+
+  ylab('SalePrice')+
+  scale_color_brewer(palette = 'Set3')+
+  scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
+  scale_fill_brewer(palette = 'Spectral') +
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect('white'),
+        text = element_text(size = 20))
 
 ggplot(data = numerical_features, aes(x=GarageCars, y = SalePrice, fill=as.factor(GarageCars))) +
   geom_boxplot()+
