@@ -111,16 +111,16 @@ ggplot(data = numerical_features, aes(x=SalePrice)) +
         panel.background = element_rect('white'),
         text = element_text(size = 20),
         plot.title = element_text(hjust = 0.5))
+
 # We use principal component analysis to find out which of these features explain the saleprice most effectively.
 
 pca <- prcomp(select(numerical_features, -ncol(numerical_features)), scale. = T)
-#pca <- prcomp(numerical_features, scale. = T)
+pca1 <- prcomp(numerical_features, scale. = T)
 variance <- pca$sdev^2
 variance_explained <- round(variance/ sum(variance)*100, 1)
 
 ggdata <- data.frame('PCs' = 1:length(variance_explained), 
                      'variance' = variance_explained)
-
 
 ggdata2 <- data.frame('PCs' = 1:length(variance_explained), 
 'variance' = cumsum(variance_explained))
@@ -237,7 +237,7 @@ ggplot(data = numerical_features, aes(x=GarageArea, y = SalePrice)) +
              shape=21, 
              fill='#3399FF',
              alpha=0.8) + geom_smooth(method = 'lm', color='red') +
-  xlab('Garage Area')+
+  xlab('Masonry Veneer Area')+
   ylab('SalePrice')+
   scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
   theme(legend.position = 'none',
@@ -272,7 +272,7 @@ ggplot(data = numerical_features, aes(x=BsmtFinSF1, y = SalePrice)) +
              shape=21, 
              fill='#3399FF',
              alpha=0.8) + geom_smooth(method = 'lm', color='red') +
-  xlab('Garage Area')+
+  xlab('Basement Area')+
   ylab('SalePrice')+
   scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
   theme(legend.position = 'none',
@@ -290,7 +290,7 @@ ggplot(data = numerical_features, aes(x=LotArea, y = SalePrice)) +
              shape=21, 
              fill='#3399FF',
              alpha=0.8) + geom_smooth(method = 'lm', color='red') +
-  xlab('Garage Area')+
+  xlab('Lot Area')+
   ylab('SalePrice')+
   scale_y_continuous(label = function(l) as.integer(format(l,scientific=F)))+
   theme(legend.position = 'none',
@@ -298,6 +298,8 @@ ggplot(data = numerical_features, aes(x=LotArea, y = SalePrice)) +
         panel.grid.minor = element_blank(),
         panel.background = element_rect('white'),
         text = element_text(size = 20))
+
+heatmap(cor(imp_features), Rowv = NA, Colv = NA)
 
 
 
