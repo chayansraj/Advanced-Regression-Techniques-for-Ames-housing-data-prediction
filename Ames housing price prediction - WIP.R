@@ -299,14 +299,24 @@ ggplot(data = numerical_features, aes(x=LotArea, y = SalePrice)) +
         panel.background = element_rect('white'),
         text = element_text(size = 20))
 
-heatmap(cor(imp_features), Rowv = NA, Colv = NA)
+
+# REsizing the numerical features according to analysis above.
+
+numerical_features <- numerical_features[,-c(11,20,6,21)]
+
+# Just out of curiosity, let's see how many of these columns have zero values
+zeroes = list()
+for(i in colnames(numerical_features)){
+  zeroes = c(zeroes,list(i = length(which(numerical_features[,i] == 0))))
+}
+names(zeroes) = colnames(numerical_features)
 
 
 
 # Here we have some really important numerical features as we can see, and now we see the association between some of these features and our sales.
-ggplot(data = numerical_features, 
-       aes(x= as.factor(OverallQual), 
-           y = SalePrice, 
+ggplot(data = categorical_features, 
+       aes(x= OverallQual, 
+           y = numerical_features[,ncol(numerical_features)], 
            fill = as.factor(OverallQual))) +
   geom_boxplot( color = 'black', outlier.color = NULL) +
   xlab('OverallQual')+
